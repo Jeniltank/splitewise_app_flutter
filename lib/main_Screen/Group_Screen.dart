@@ -1119,48 +1119,60 @@ class _GroupScreenState extends State<GroupScreen> {
                     itemCount: userGroups.length,
                     itemBuilder: (context, index) {
                       Group group = userGroups[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GroupListView(
-                                groupName: group.groupName,
-                                groupType: group.groupType,
-                                friends:
-                                    group.groupMembers, // Use group members
-                              ),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          color: Colors.green.shade800,
-                          elevation:
-                              4, // Increase elevation for a more prominent shadow
-                          margin: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal:
-                                  16), // Adjust margin for better spacing
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              group.groupName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
-                            subtitle: Text(
-                              group.groupType,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white70,
-                              ),
+                      return Card(
+                        color: Colors.green.shade800,
+                        elevation: 4,
+                        margin:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            group.groupName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.white,
                             ),
                           ),
+                          subtitle: Text(
+                            group.groupType,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(
+                              Icons.delete,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () {
+                              // Ensure groupId is not null before attempting deletion
+                              if (group.groupId != null) {
+                                // Assuming groupId is a String, if it's not, adjust accordingly
+                                deleteGroup(group
+                                    .groupId!); // Use ! to assert non-nullability
+                              } else {
+                                // Handle null groupId case
+                                print('Group ID is null. Unable to delete.');
+                              }
+                            },
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GroupListView(
+                                  groupName: group.groupName,
+                                  groupType: group.groupType,
+                                  friends:
+                                      group.groupMembers, // Use group members
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
