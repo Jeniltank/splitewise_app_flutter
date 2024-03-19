@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "927704003520",
+    "project_id": "splitwise-237e1",
+    "storage_bucket": "splitwise-237e1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927704003520:android:bf3ebef1273b80df858e25",
+        "android_client_info": {
+          "package_name": "com.example.splitewise_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4IeJNlnpg2jJuy2K1p3dYokOpDvxRngw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
