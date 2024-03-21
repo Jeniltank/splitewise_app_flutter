@@ -215,22 +215,22 @@ class _AddGroupState extends State<AddGroup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black87,
+      // backgroundColor: Colors.black87,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: Text(
           "Create a group",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.teal,
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 20.0),
             child: Align(
               alignment: Alignment.topLeft,
               child: IconButton(
-                icon: Icon(Icons.close, color: Colors.white),
+                icon: Icon(Icons.close, color: Colors.black),
                 onPressed: () {
                   Navigator.pop(context);
                 },
@@ -249,11 +249,10 @@ class _AddGroupState extends State<AddGroup> {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor:
-                      Colors.green, // Customize the color as needed
+                  backgroundColor: Colors.teal, // Customize the color as needed
                   child: Icon(
                     Icons.group,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                 ),
                 SizedBox(
@@ -262,12 +261,12 @@ class _AddGroupState extends State<AddGroup> {
                 Expanded(
                   child: TextField(
                     controller: groupNameController,
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Enter group name',
-                      hintStyle: TextStyle(color: Colors.white),
+                      hintStyle: TextStyle(color: Colors.black),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+                        borderSide: BorderSide(color: Colors.black),
                       ),
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
@@ -280,7 +279,7 @@ class _AddGroupState extends State<AddGroup> {
             SizedBox(height: 20),
             Text(
               "Type",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black),
             ),
             SizedBox(height: 20),
             SingleChildScrollView(
@@ -299,7 +298,7 @@ class _AddGroupState extends State<AddGroup> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      primary: groupType == 'Trip' ? Colors.green : Colors.grey,
+                      primary: groupType == 'Trip' ? Colors.teal : Colors.grey,
                     ),
                   ),
                   SizedBox(width: 10),
@@ -314,7 +313,7 @@ class _AddGroupState extends State<AddGroup> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      primary: groupType == 'Food' ? Colors.green : Colors.grey,
+                      primary: groupType == 'Food' ? Colors.teal : Colors.grey,
                     ),
                   ),
                 ],
@@ -347,7 +346,7 @@ class _AddGroupState extends State<AddGroup> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                primary: Colors.green,
+                primary: Colors.teal,
                 textStyle: TextStyle(color: Colors.white),
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 shape: RoundedRectangleBorder(

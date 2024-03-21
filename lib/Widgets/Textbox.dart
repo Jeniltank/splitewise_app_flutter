@@ -23,7 +23,7 @@
 //     return Scaffold(
 //       backgroundColor: Colors.black87,
 //       appBar: AppBar(
-//         backgroundColor: Colors.green,
+//         backgroundColor: Colors.teal,
 //         automaticallyImplyLeading: false,
 //         title: Center(
 //           child: Text(
@@ -145,7 +145,7 @@
 //   Widget build(BuildContext context) {
 //     return Container(
 //       decoration: BoxDecoration(
-//         color: Colors.green,
+//         color: Colors.teal,
 //         borderRadius: BorderRadius.circular(8),
 //       ),
 //       padding: EdgeInsets.only(left: 15, right: 0, top: 0, bottom: 15),
@@ -198,7 +198,7 @@ class _MyTextBoxState extends State<MyTextBox> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.green.shade800, // Use a darker shade of green
+        color: Colors.teal.shade800, // Use a darker shade of teal
         borderRadius: BorderRadius.circular(12), // Increase border radius
         boxShadow: [
           BoxShadow(

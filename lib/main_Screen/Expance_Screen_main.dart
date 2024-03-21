@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//import 'package:splitewise_flutter/main_Screen_Child/Add_friends.dart';
 import 'package:splitewise_flutter/group_Screen_Child/Add_friends.dart';
 
 class Expancemain extends StatefulWidget {
@@ -15,9 +16,9 @@ class _ExpancemainState extends State<Expancemain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black87,
+      //backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.green.shade800,
+        backgroundColor: Colors.teal,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -32,7 +33,9 @@ class _ExpancemainState extends State<Expancemain> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddFriends(),
+                    builder: (context) => AddFriends(
+                      targetGroup: "",
+                    ),
                   ));
               // Add your onPressed logic for the group icon here
             },
@@ -54,9 +57,8 @@ class _ExpancemainState extends State<Expancemain> {
             ),
             Container(
               decoration: BoxDecoration(
-                color:
-                    Colors.green, // Set the background color of the container
-                border: Border.all(color: Colors.green), // Border
+                color: Colors.teal, // Set the background color of the container
+                border: Border.all(color: Colors.cyan), // Border
                 borderRadius: BorderRadius.circular(8.0), // Border radius
               ),
               child: TextButton.icon(
@@ -64,7 +66,9 @@ class _ExpancemainState extends State<Expancemain> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AddFriends(),
+                      builder: (context) => const AddFriends(
+                        targetGroup: '',
+                      ),
                     ),
                   );
                 },

@@ -21,7 +21,7 @@
 // //     return Scaffold(
 // //         backgroundColor: Colors.black87,
 // //         appBar: AppBar(
-// //           backgroundColor: Colors.green,
+// //           backgroundColor: Colors.teal,
 // //           automaticallyImplyLeading: false,
 // //           title: Center(
 // //             child: Text(
@@ -187,7 +187,7 @@
 //     return Scaffold(
 //       backgroundColor: Colors.black87,
 //       appBar: AppBar(
-//         backgroundColor: Colors.green,
+//         backgroundColor: Colors.teal,
 //         title: Text(
 //           "Profil Screen",
 //           style: TextStyle(color: Colors.white),
@@ -227,7 +227,7 @@
 //                   CircleAvatar(
 //                     radius: 40, // Increase the radius to increase the size
 //                     backgroundColor:
-//                         Colors.green, // Set the background color to green
+//                         Colors.teal, // Set the background color to teal
 //                     child: Icon(
 //                       Icons.person,
 //                       size: 72,
@@ -286,14 +286,226 @@
 //     );
 //   }
 // }
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/material.dart';
+//
+// import '../Widgets/Textbox.dart';
+//
+// class ProfilScreen extends StatefulWidget {
+//   const ProfilScreen({Key? key});
+//
+//   @override
+//   State<ProfilScreen> createState() => _ProfilScreenState();
+// }
+//
+// class _ProfilScreenState extends State<ProfilScreen> {
+//   final currentUser = FirebaseAuth.instance.currentUser;
+//   final userCollection = FirebaseFirestore.instance.collection('Users');
+//
+//   Future<void> _logout(BuildContext context) async {
+//     await FirebaseAuth.instance.signOut();
+//     Navigator.pushReplacementNamed(context, '/login()');
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.black87,
+//       appBar: AppBar(
+//         backgroundColor: Colors.teal.shade800,
+//         title: Text(
+//           "Profile Screen",
+//           style: TextStyle(color: Colors.white),
+//         ),
+//         centerTitle: true,
+//         actions: [
+//           IconButton(
+//             icon: Icon(
+//               Icons.logout,
+//               color: Colors.white,
+//             ),
+//             onPressed: () => _logout(context),
+//           ),
+//         ],
+//       ),
+//       body: StreamBuilder<DocumentSnapshot>(
+//         stream: FirebaseFirestore.instance
+//             .collection("Users")
+//             .doc(currentUser?.uid)
+//             .snapshots(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return Center(child: CircularProgressIndicator());
+//           } else if (snapshot.hasError) {
+//             return Center(child: Text('Error: ${snapshot.error}'));
+//           } else {
+//             if (snapshot.hasData && snapshot.data!.exists) {
+//               final userData = snapshot.data!.data() as Map<String, dynamic>;
+//               return ListView(
+//                 padding: EdgeInsets.all(20),
+//                 children: [
+//                   SizedBox(height: 20),
+//                   CircleAvatar(
+//                     radius: 40,
+//                     backgroundColor: Colors.teal.shade800,
+//                     child: Icon(
+//                       Icons.person,
+//                       size: 40,
+//                       color: Colors.white,
+//                     ),
+//                   ),
+//                   SizedBox(height: 20),
+//                   Text(
+//                     currentUser!.email ?? 'No email found',
+//                     textAlign: TextAlign.center,
+//                     style: TextStyle(color: Colors.grey[700], fontSize: 20),
+//                   ),
+//                   SizedBox(height: 20),
+//                   Text(
+//                     'My Details',
+//                     style: TextStyle(color: Colors.grey[700], fontSize: 18),
+//                   ),
+//                   MyTextBox(
+//                     text: userData['username'] ?? 'No username found',
+//                     sectionName: 'Username',
+//                     onPressed: () => editField('username'),
+//                     onPress: () {},
+//                     sectionNmae: '',
+//                   ),
+//                 ],
+//               );
+//             } else {
+//               return Center(child: Text('No data found'));
+//             }
+//           }
+//         },
+//       ),
+//     );
+//   }
+//
+//   editField(String s) {}
+// }
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/material.dart';
+//
+// import '../Widgets/Textbox.dart';
+//
+// class ProfilScreen extends StatefulWidget {
+//   const ProfilScreen({Key? key});
+//
+//   @override
+//   State<ProfilScreen> createState() => _ProfilScreenState();
+// }
+//
+// class _ProfilScreenState extends State<ProfilScreen> {
+//   final userCollection = FirebaseFirestore.instance.collection('Users');
+//
+//   Future<void> _logout(BuildContext context) async {
+//     await FirebaseAuth.instance.signOut();
+//     Navigator.pushReplacementNamed(context, '/login');
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final currentUser = FirebaseAuth.instance.currentUser;
+//
+//     if (currentUser == null) {
+//       // If no user is logged in, return a placeholder widget
+//       return Scaffold(
+//         appBar: AppBar(
+//           title: Text("Profile Screen"),
+//         ),
+//         body: Center(
+//           child: Text("No user logged in."),
+//         ),
+//       );
+//     }
+//
+//     return Scaffold(
+//       //backgroundColor: Colors.black87,
+//       appBar: AppBar(
+//         backgroundColor: Colors.teal,
+//         title: Text(
+//           "Profile Screen",
+//           style: TextStyle(color: Colors.white),
+//         ),
+//         centerTitle: true,
+//         actions: [
+//           IconButton(
+//             icon: Icon(
+//               Icons.logout,
+//               color: Colors.white,
+//             ),
+//             onPressed: () => _logout(context),
+//           ),
+//         ],
+//       ),
+//       body: StreamBuilder<DocumentSnapshot>(
+//         stream: FirebaseFirestore.instance
+//             .collection("Users")
+//             .doc(currentUser.uid)
+//             .snapshots(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return Center(child: CircularProgressIndicator());
+//           } else if (snapshot.hasError) {
+//             return Center(child: Text('Error: ${snapshot.error}'));
+//           } else if (!snapshot.hasData || !snapshot.data!.exists) {
+//             return Center(child: Text('User data not found.'));
+//           } else {
+//             final userData = snapshot.data!.data() as Map<String, dynamic>;
+//             return ListView(
+//               padding: EdgeInsets.all(20),
+//               children: [
+//                 SizedBox(height: 20),
+//                 CircleAvatar(
+//                   radius: 40,
+//                   backgroundColor: Colors.teal.shade800,
+//                   child: Icon(
+//                     Icons.person,
+//                     size: 40,
+//                     color: Colors.white,
+//                   ),
+//                 ),
+//                 SizedBox(height: 20),
+//                 Text(
+//                   currentUser.email ?? 'No email found',
+//                   textAlign: TextAlign.center,
+//                   style: TextStyle(color: Colors.grey[700], fontSize: 20),
+//                 ),
+//                 SizedBox(height: 20),
+//                 Text(
+//                   'My Details',
+//                   style: TextStyle(color: Colors.grey[700], fontSize: 18),
+//                 ),
+//                 MyTextBox(
+//                   text: userData['username'] ?? 'No username found',
+//                   sectionName: 'Username',
+//                   onPressed: () => editField('username'),
+//                   onPress: () {}, sectionNmae: '',
+//                   //sectionName: '',
+//                 ),
+//               ],
+//             );
+//           }
+//         },
+//       ),
+//     );
+//   }
+//
+//   editField(String field) {}
+// }
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../Widgets/Textbox.dart';
+import '../Widgets/Textbox.dart'; // Assuming this is your custom widget for text boxes
+import '../firebase_login_or_signup/loginPage.dart'; // Assuming this is where your LoginPage resides
 
 class ProfilScreen extends StatefulWidget {
-  const ProfilScreen({Key? key});
+  const ProfilScreen({Key? key}) : super(key: key);
 
   @override
   State<ProfilScreen> createState() => _ProfilScreenState();
@@ -305,15 +517,15 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/login()');
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => LoginPage()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.green.shade800,
+        backgroundColor: Colors.teal,
         title: Text(
           "Profile Screen",
           style: TextStyle(color: Colors.white),
@@ -348,7 +560,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                   SizedBox(height: 20),
                   CircleAvatar(
                     radius: 40,
-                    backgroundColor: Colors.green.shade800,
+                    backgroundColor: Colors.teal,
                     child: Icon(
                       Icons.person,
                       size: 40,
@@ -372,6 +584,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     onPressed: () => editField('username'),
                     onPress: () {},
                     sectionNmae: '',
+                    //sectionName: '',
                   ),
                 ],
               );
@@ -384,5 +597,17 @@ class _ProfilScreenState extends State<ProfilScreen> {
     );
   }
 
-  editField(String s) {}
+  editField(String fieldName) {
+    // Add logic for editing field
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    initialRoute: '/',
+    routes: {
+      '/': (context) => ProfilScreen(),
+      '/login': (context) => LoginPage(),
+    },
+  ));
 }

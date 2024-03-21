@@ -1010,9 +1010,9 @@ class _GroupScreenState extends State<GroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black87,
+      // backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.green.shade800,
+        backgroundColor: Colors.teal,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -1049,7 +1049,7 @@ class _GroupScreenState extends State<GroupScreen> {
               width: 200,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.green, Colors.green.shade800],
+                  colors: [Colors.green, Colors.teal],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -1120,7 +1120,7 @@ class _GroupScreenState extends State<GroupScreen> {
                     itemBuilder: (context, index) {
                       Group group = userGroups[index];
                       return Card(
-                        color: Colors.green.shade800,
+                        color: Colors.teal,
                         elevation: 4,
                         margin:
                             EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -1128,6 +1128,8 @@ class _GroupScreenState extends State<GroupScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: ListTile(
+                          leading: Icon(Icons.group, color: Colors.white),
+                          // Prefix icon
                           title: Text(
                             group.groupName,
                             style: TextStyle(
@@ -1166,9 +1168,11 @@ class _GroupScreenState extends State<GroupScreen> {
                               MaterialPageRoute(
                                 builder: (context) => GroupListView(
                                   groupName: group.groupName,
+                                  groupId: group.groupId!,
                                   groupType: group.groupType,
-                                  friends:
-                                      group.groupMembers, // Use group members
+                                  groupMembers: [],
+                                  // friends:
+                                  //  group.groupMembers, groupMembers: [], // Use group members
                                 ),
                               ),
                             );

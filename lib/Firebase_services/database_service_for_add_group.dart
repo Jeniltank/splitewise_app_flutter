@@ -738,4 +738,19 @@ class DatabaseServiceForAddGroup {
       return null;
     }
   }
+
+  void addMemberToGroup(String userId, String groupName) {
+    // Reference to the group document
+    DocumentReference groupRef =
+        FirebaseFirestore.instance.collection('Groups').doc(groupName);
+
+    // Update the group document to add the new member
+    groupRef.update({
+      'members': FieldValue.arrayUnion([userId]),
+    }).then((value) {
+      print('Member added to group successfully!');
+    }).catchError((error) {
+      print('Failed to add member to group: $error');
+    });
+  }
 }
