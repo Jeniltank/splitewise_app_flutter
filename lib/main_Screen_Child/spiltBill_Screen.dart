@@ -54,7 +54,7 @@ class _SpliteBillState extends State<SpliteBill> {
         ),
         //automaticallyImplyLeading: false,
         centerTitle: true,
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.teal,
       ),
       backgroundColor: Colors.black87,
       body: SingleChildScrollView(
@@ -72,7 +72,7 @@ class _SpliteBillState extends State<SpliteBill> {
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: 120,
-                decoration: BoxDecoration(color: Colors.green),
+                decoration: BoxDecoration(color: Colors.teal),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -196,7 +196,7 @@ class _SpliteBillState extends State<SpliteBill> {
                     width: MediaQuery.of(context).size.width / 2,
                     height: 70,
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: Colors.teal,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
@@ -265,7 +265,7 @@ class _SpliteBillState extends State<SpliteBill> {
                     width: MediaQuery.of(context).size.width / 3,
                     height: 70,
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: Colors.teal,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Padding(
@@ -337,7 +337,7 @@ class _SpliteBillState extends State<SpliteBill> {
               ),
               TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.teal,
                 ),
                 onPressed: () {
                   Navigator.push(

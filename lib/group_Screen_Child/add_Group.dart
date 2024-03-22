@@ -269,7 +269,7 @@ class _AddGroupState extends State<AddGroup> {
                         borderSide: BorderSide(color: Colors.black),
                       ),
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+                        borderSide: BorderSide(color: Colors.black),
                       ),
                     ),
                   ),

@@ -93,7 +93,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
             color: Colors.white,
           ),
           Icon(
-            Icons.group_add,
+            Icons.add_chart,
             color: Colors.white,
           ),
           //Text("Goup"),

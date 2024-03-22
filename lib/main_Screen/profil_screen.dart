@@ -497,9 +497,13 @@
 //
 //   editField(String field) {}
 // }
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../Widgets/Textbox.dart'; // Assuming this is your custom widget for text boxes
 import '../firebase_login_or_signup/loginPage.dart'; // Assuming this is where your LoginPage resides
@@ -514,11 +518,67 @@ class ProfilScreen extends StatefulWidget {
 class _ProfilScreenState extends State<ProfilScreen> {
   final currentUser = FirebaseAuth.instance.currentUser;
   final userCollection = FirebaseFirestore.instance.collection('Users');
+  File? _image;
 
   Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => LoginPage()));
+  }
+
+  Future<void> _uploadImage() async {
+    if (_image != null) {
+      try {
+        // Print debug information
+        print('Uploading image...');
+
+        // Upload image to Firebase Storage
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('profile_images/${currentUser!.uid}.jpg');
+        await storageRef.putFile(_image!);
+
+        // Get the download URL of the uploaded image
+        final imageUrl = await storageRef.getDownloadURL();
+
+        // Update user data with the image URL
+        await userCollection
+            .doc(currentUser!.uid)
+            .update({'profileImageUrl': imageUrl});
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Profile image uploaded successfully'),
+          ),
+        );
+      } catch (error) {
+        // Print error information
+        print('Error uploading image: $error');
+
+        // Show error message to the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload image: $error'),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No image selected'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
   }
 
   @override
@@ -558,14 +618,26 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 padding: EdgeInsets.all(20),
                 children: [
                   SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.teal,
-                    child: Icon(
-                      Icons.person,
-                      size: 40,
-                      color: Colors.white,
+                  GestureDetector(
+                    onTap: () => _pickImage(ImageSource.gallery),
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.teal,
+                      backgroundImage: _image != null
+                          ? FileImage(_image!) as ImageProvider<Object>
+                          : NetworkImage(userData['profileImageUrl'] ??
+                                  'https://via.placeholder.com/150')
+                              as ImageProvider<Object>,
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                      ),
                     ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _uploadImage,
+                    child: Text('Upload Image'),
                   ),
                   SizedBox(height: 20),
                   Text(

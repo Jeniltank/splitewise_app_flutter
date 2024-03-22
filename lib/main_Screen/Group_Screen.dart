@@ -1049,7 +1049,7 @@ class _GroupScreenState extends State<GroupScreen> {
               width: 200,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.green, Colors.teal],
+                  colors: [Colors.teal, Colors.teal],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -1128,7 +1128,8 @@ class _GroupScreenState extends State<GroupScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: ListTile(
-                          leading: Icon(Icons.group, color: Colors.white),
+                          leading: CircleAvatar(
+                              child: Icon(Icons.group, color: Colors.white)),
                           // Prefix icon
                           title: Text(
                             group.groupName,
@@ -1169,8 +1170,8 @@ class _GroupScreenState extends State<GroupScreen> {
                                 builder: (context) => GroupListView(
                                   groupName: group.groupName,
                                   groupId: group.groupId!,
-                                  groupType: group.groupType,
-                                  groupMembers: [],
+                                  groupType: group.groupType, groupMembers: [],
+                                  //groupMembers: [],
                                   // friends:
                                   //  group.groupMembers, groupMembers: [], // Use group members
                                 ),
