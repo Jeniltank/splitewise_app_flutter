@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:splitewise_flutter/group_Screen_Child/Add_friends.dart';
 
+import '../add_expance Scren.dart';
+
 class GroupListView extends StatefulWidget {
   final String groupName;
   final String groupType;
@@ -83,8 +85,8 @@ class _GroupListViewState extends State<GroupListView> {
             SizedBox(height: 20),
             Expanded(
               child: StreamBuilder(
-                stream:
-                    _getGroupMembersStream(), // Your stream of group members
+                stream: getGroupMembersStream(
+                    widget.groupId), // Your stream of group members
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return CircularProgressIndicator();
@@ -107,7 +109,7 @@ class _GroupListViewState extends State<GroupListView> {
                             ),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: Colors.teal,
+                                backgroundColor: Colors.white,
                                 child: Icon(
                                   Icons.person,
                                   color: Colors.black,
@@ -118,21 +120,29 @@ class _GroupListViewState extends State<GroupListView> {
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                                  color: Colors.white,
                                 ),
                               ),
-                              // No need to display the ID here
                               trailing: IconButton(
+                                onPressed: () async {
+                                  // Remove the member from Firestore
+                                  await FirebaseFirestore.instance
+                                      .collection('groups')
+                                      .doc(widget.groupId)
+                                      .update({
+                                    'groupMembers': FieldValue.arrayRemove(
+                                        [groupMembers[index]])
+                                  });
+
+                                  setState(() {
+                                    // Remove the member from the local list
+                                    widget.groupMembers.removeAt(index);
+                                  });
+                                },
                                 icon: Icon(
                                   Icons.delete,
                                   color: Colors.red,
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    // Implement delete functionality
-                                    groupMembers.removeAt(index);
-                                  });
-                                },
                               ),
                             ),
                           ),
@@ -144,40 +154,73 @@ class _GroupListViewState extends State<GroupListView> {
               ),
             ),
             SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  final selectedFriendId = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddFriends(
-                        targetGroup: widget.groupId,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    final selectedFriendId = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddFriends(
+                          targetGroup: widget.groupId,
+                        ),
                       ),
-                    ),
-                  );
+                    );
 
-                  // If a friend was selected, add them to the group
-                  if (selectedFriendId != null) {
-                    setState(() {
-                      widget.groupMembers.add(selectedFriendId);
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                  primary: Colors.teal,
-                  textStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+                    // If a friend was selected, add them to the group
+                    if (selectedFriendId != null) {
+                      setState(() {
+                        widget.groupMembers.add(selectedFriendId);
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                    primary: Colors.teal,
+                    textStyle:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                  child: Text(
+                    'Add Friend',
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
-                child: Text(
-                  'Add Friend',
-                  style: TextStyle(color: Colors.black),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    print("widget.groupMembers ${widget.groupMembers}");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddExpenseScreen(
+                          groupId: widget.groupId,
+                          groupMembers: widget.groupMembers,
+                          groupName: widget.groupName,
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                    primary: Colors.teal,
+                    textStyle:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                  child: Text(
+                    'Add Expense',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -186,40 +229,41 @@ class _GroupListViewState extends State<GroupListView> {
   }
 
   // Example method to get a stream of group members
-  Stream _getGroupMembersStream() {
-    // Reference to the Firestore collection
-    CollectionReference groupsCollection =
-        FirebaseFirestore.instance.collection('groups');
 
-    // Return a stream of snapshots from Firestore
-    return groupsCollection.doc(widget.groupId).snapshots().map((snapshot) {
-      // Check if snapshot data is available and not null
-      if (snapshot.data() != null) {
-        // Extract the groupMembers field from the snapshot data
-        dynamic data = snapshot.data()!;
-        List<dynamic> groupMembersData = data['groupMembers'] ?? [];
-
-        // Convert dynamic list to List<String>
-        List groupMembers = groupMembersData.map((member) => member).toList();
-
-        // Return the list of group members
-        return groupMembers;
-      } else {
-        // Handle case when snapshot data is null or unavailable
-        return [];
-      }
-    });
-  }
-
-  String _extractUsername(String fullName) {
+  Future<String> _extractUsername(String fullName) async {
     // Split the full name by the colon character ':'
     List<String> parts = fullName.split(':');
     if (parts.length == 2) {
       // Return the second part, which should be the username
       return parts[1].trim();
     } else {
-      // If the format is not as expected, return the full name
-      return fullName;
+      // If the format is not as expected, throw an error or return a default value
+      throw FormatException('Invalid full name format');
     }
   }
+}
+
+Stream getGroupMembersStream(groupId) {
+  // Reference to the Firestore collection
+  CollectionReference groupsCollection =
+      FirebaseFirestore.instance.collection('groups');
+
+  // Return a stream of snapshots from Firestore
+  return groupsCollection.doc(groupId).snapshots().map((snapshot) {
+    // Check if snapshot data is available and not null
+    if (snapshot.data() != null) {
+      // Extract the groupMembers field from the snapshot data
+      dynamic data = snapshot.data()!;
+      List<dynamic> groupMembersData = data['groupMembers'] ?? [];
+
+      // Convert dynamic list to List<String>
+      List groupMembers = groupMembersData.map((member) => member).toList();
+
+      // Return the list of group members
+      return groupMembers;
+    } else {
+      // Handle case when snapshot data is null or unavailable
+      return [];
+    }
+  });
 }

@@ -1129,7 +1129,7 @@ class _GroupScreenState extends State<GroupScreen> {
                         ),
                         child: ListTile(
                           leading: CircleAvatar(
-                              child: Icon(Icons.group, color: Colors.white)),
+                              child: Icon(Icons.group, color: Colors.black)),
                           // Prefix icon
                           title: Text(
                             group.groupName,

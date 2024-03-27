@@ -51,34 +51,34 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                           builder: (context) => SpliteBill(),
                         ));
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ),
-                      color: Colors.teal,
-                    ),
-                    height: 50,
-                    width: 160,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 2),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Add your expense',
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  // child: Container(
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: BorderRadius.all(
+                  //       Radius.circular(10),
+                  //     ),
+                  //     color: Colors.teal,
+                  //   ),
+                  //   height: 50,
+                  //   width: 160,
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.only(left: 2),
+                  //     child: Row(
+                  //       children: [
+                  //         Icon(
+                  //           Icons.add,
+                  //           color: Colors.white,
+                  //         ),
+                  //         SizedBox(width: 8),
+                  //         Text(
+                  //           'Add your expense',
+                  //           style: TextStyle(
+                  //             color: Colors.white,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                 ),
               ),
             )
