@@ -529,19 +529,15 @@ class _ProfilScreenState extends State<ProfilScreen> {
   Future<void> _uploadImage() async {
     if (_image != null) {
       try {
-        // Print debug information
         print('Uploading image...');
 
-        // Upload image to Firebase Storage
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('profile_images/${currentUser!.uid}.jpg');
         await storageRef.putFile(_image!);
 
-        // Get the download URL of the uploaded image
         final imageUrl = await storageRef.getDownloadURL();
 
-        // Update user data with the image URL
         await userCollection
             .doc(currentUser!.uid)
             .update({'profileImageUrl': imageUrl});
@@ -552,10 +548,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
           ),
         );
       } catch (error) {
-        // Print error information
         print('Error uploading image: $error');
-
-        // Show error message to the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to upload image: $error'),
@@ -621,7 +614,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                   GestureDetector(
                     onTap: () => _pickImage(ImageSource.gallery),
                     child: CircleAvatar(
-                      radius: 40,
+                      radius: 80,
                       backgroundColor: Colors.teal,
                       backgroundImage: _image != null
                           ? FileImage(_image!) as ImageProvider<Object>
@@ -656,7 +649,6 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     onPressed: () => editField('username'),
                     onPress: () {},
                     sectionNmae: '',
-                    //sectionName: '',
                   ),
                 ],
               );
