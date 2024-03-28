@@ -198,17 +198,19 @@
 // // }
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Expense {
   final String description;
   final double totalAmount;
+  final Map<String, dynamic> individualShares;
 
-  Expense(this.description, this.totalAmount);
+  Expense(this.description, this.totalAmount, this.individualShares);
 }
 
 class Expancemain extends StatelessWidget {
-  const Expancemain({Key? key}) : super(key: key);
+  final currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +225,10 @@ class Expancemain extends StatelessWidget {
         ),
       ),
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('expenses').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('expenses')
+            .where('creatorUserId', isEqualTo: currentUser!.uid)
+            .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -239,7 +244,11 @@ class Expancemain extends StatelessWidget {
           // Convert expenses from Firestore to Expense objects
           List<Expense> expenses =
               snapshot.data!.docs.map((DocumentSnapshot doc) {
-            return Expense(doc['description'], doc['totalAmount']);
+            return Expense(
+              doc['description'],
+              doc['totalAmount'],
+              doc['individualShares'],
+            );
           }).toList();
 
           // Create a series for the pie chart
@@ -272,20 +281,20 @@ class Expancemain extends StatelessWidget {
                   itemCount: expenses.length,
                   itemBuilder: (context, index) {
                     var expense = expenses[index];
-
-                    // Assuming currentUserIndex is the index of the current user in the individualShares list
-                    // double currentUserShare =
-                    //     expense.individualShares[currentUserIndex];
-
                     return Card(
                       color: Colors.teal,
                       elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+                      margin: EdgeInsets.symmetric(
+                        vertical: 5,
+                        horizontal: 16,
+                      ),
                       child: Padding(
-                        padding: const EdgeInsets.all(0), // Set padding to 0
+                        padding: const EdgeInsets.all(0),
                         child: ListTile(
                           contentPadding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
                           title: Text(
                             expense.description,
                             style: TextStyle(
@@ -300,14 +309,21 @@ class Expancemain extends StatelessWidget {
                               Text(
                                 'Amount: ₹${expense.totalAmount}',
                                 style: TextStyle(
-                                    fontSize: 16, color: Colors.white),
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
                               ),
-                              // Display individual share for the current user
-                              // Text(
-                              //   'Your Share: ₹$currentUserShare', // Adjust text according to your requirement
-                              //   style: TextStyle(
-                              //       fontSize: 16, color: Colors.white),
-                              // ),
+                              if (expense.individualShares != null)
+                                ...expense.individualShares.entries
+                                    .map((entry) {
+                                  return Text(
+                                    '${entry.key}: ₹${entry.value}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                }),
                             ],
                           ),
                           leading: CircleAvatar(
@@ -320,8 +336,7 @@ class Expancemain extends StatelessWidget {
                               color: Colors.red,
                             ),
                             onPressed: () {
-                              _deleteExpense(
-                                  expense); // Call the function to delete the expense
+                              _deleteExpense(expense);
                             },
                           ),
                         ),
@@ -339,7 +354,6 @@ class Expancemain extends StatelessWidget {
 }
 
 void _deleteExpense(Expense expense) async {
-  // Find the expense document in Firestore
   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
       .collection('expenses')
       .where('description', isEqualTo: expense.description)
@@ -347,7 +361,6 @@ void _deleteExpense(Expense expense) async {
       .limit(1)
       .get();
 
-  // Delete the found document
   querySnapshot.docs.first.reference.delete();
 }
 

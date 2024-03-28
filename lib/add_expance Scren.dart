@@ -265,8 +265,8 @@
 //     Navigator.pop(context);
 //   }
 // }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 // Assuming you have a function to get group members stream
@@ -351,69 +351,72 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
             ),
             SizedBox(height: 10),
-            StreamBuilder(
-              stream: getGroupMembersStream(widget.groupId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  List groupMembers = snapshot.data ?? [];
-                  return ListView.builder(
-                    itemCount: groupMembers.length,
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      String username = groupMembers[index]['username'];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Card(
-                          elevation: 2,
-                          color: Colors.teal,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.white,
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.black,
-                              ),
+            Expanded(
+              // Wrap your ListView.builder with Expanded
+              child: StreamBuilder(
+                stream: getGroupMembersStream(widget.groupId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    List groupMembers = snapshot.data ?? [];
+                    return ListView.builder(
+                      itemCount: groupMembers.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        String username = groupMembers[index]['username'];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Card(
+                            elevation: 2,
+                            color: Colors.teal,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
                             ),
-                            title: Text(
-                              username,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  Icons.person,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              title: Text(
+                                username,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              // Assuming you want to select members here
+                              onTap: () {
+                                // Toggle member selection
+                                setState(() {
+                                  if (widget.groupMembers.contains(username)) {
+                                    widget.groupMembers.remove(username);
+                                  } else {
+                                    widget.groupMembers.add(username);
+                                  }
+                                });
+                              },
+                              // Assuming you want to show selected members differently
+                              trailing: Icon(
+                                widget.groupMembers.contains(username)
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
                                 color: Colors.white,
                               ),
                             ),
-                            // Assuming you want to select members here
-                            onTap: () {
-                              // Toggle member selection
-                              setState(() {
-                                if (widget.groupMembers.contains(username)) {
-                                  widget.groupMembers.remove(username);
-                                } else {
-                                  widget.groupMembers.add(username);
-                                }
-                              });
-                            },
-                            // Assuming you want to show selected members differently
-                            trailing: Icon(
-                              widget.groupMembers.contains(username)
-                                  ? Icons.check_circle
-                                  : Icons.radio_button_unchecked,
-                              color: Colors.white,
-                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                }
-              },
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -428,24 +431,30 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
+  // Modify _addExpense() method
   void _addExpense() async {
     String description = _descriptionController.text;
     double totalAmount = double.parse(_amountController.text);
 
-    // Calculate individual share for each member
-    double individualShare = totalAmount / widget.groupMembers.length;
-
-    // Create a map to store individual shares
+    // Create a map to store individual shares for selected members
     Map<String, double> individualShares = {};
     for (String member in widget.groupMembers) {
-      individualShares[member] = individualShare;
+      // Only calculate individual shares for selected members
+      if (widget.groupMembers.contains(member)) {
+        double individualShare = totalAmount / widget.groupMembers.length;
+        individualShares[member] = individualShare;
+      }
     }
 
     // Get the current server timestamp
     final currentTimeStamp = FieldValue.serverTimestamp();
 
+    // Get the current user ID from Firebase Authentication
+    String userId = FirebaseAuth.instance.currentUser!.uid; // Get user ID
+
     // Store the expense details in Firestore with timestamp
     await FirebaseFirestore.instance.collection('expenses').add({
+      'creatorUserId': userId, // Include the creator user ID
       'groupId': widget.groupId,
       'groupName': widget.groupName, // Include the group name
       'totalAmount': totalAmount,
