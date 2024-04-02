@@ -618,13 +618,18 @@ class _ProfilScreenState extends State<ProfilScreen> {
                       backgroundColor: Colors.teal,
                       backgroundImage: _image != null
                           ? FileImage(_image!) as ImageProvider<Object>
-                          : NetworkImage(userData['profileImageUrl'] ??
-                                  'https://via.placeholder.com/150')
-                              as ImageProvider<Object>,
-                      child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                      ),
+                          : userData['profileImageUrl'] != null
+                              ? NetworkImage(userData['profileImageUrl'])
+                              : null,
+                      // Setting null if no image or profile image URL is available
+                      child: _image == null &&
+                              userData['profileImageUrl'] ==
+                                  null // Check if no image or profile image URL is available
+                          ? Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                            )
+                          : null, // Set null if there's an image or profile image URL
                     ),
                   ),
                   SizedBox(height: 20),

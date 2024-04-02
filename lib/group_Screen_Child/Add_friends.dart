@@ -30,12 +30,22 @@ class _AddFriendsState extends State<AddFriends> {
   }
 
   Future<void> _getContacts() async {
-    if (await Permission.contacts.request().isGranted) {
-      Iterable<Contact> contacts =
+    final contactsPermission = await Permission.contacts.request();
+    if (contactsPermission.isGranted) {
+      final Iterable<Contact>? contacts =
           await ContactsService.getContacts(withThumbnails: false);
-      for (var contact in contacts) {
-        print('Name: ${contact.displayName}, Phone: ${contact.phones}');
-        // Add logic to extract phone numbers and perform necessary operations
+      if (contacts != null) {
+        for (var contact in contacts) {
+          print('Name: ${contact.displayName}');
+          if (contact.phones != null) {
+            for (var phone in contact.phones!) {
+              print('Phone: ${phone.value}');
+              // Add logic to process the phone number here
+            }
+          }
+        }
+      } else {
+        print('Contacts not available');
       }
     } else {
       print('Permission denied');

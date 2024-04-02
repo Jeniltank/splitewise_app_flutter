@@ -1,11 +1,11 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:splitewise_flutter/main_Screen/Activity_Screen.dart';
+import 'package:splitewise_flutter/main_Screen/Expance_Screen_main.dart';
 import 'package:splitewise_flutter/main_Screen/Group_Screen.dart';
 //import 'package:splitewise_flutter/main_Screen/profil_screen.dart';
 import 'package:splitewise_flutter/main_Screen_Child/spiltBill_Screen.dart';
 
-import '../main_Screen/Expance_Screen_main.dart';
 import '../main_Screen/profil_screen.dart';
 //import 'package:get/get.dart';
 
@@ -25,7 +25,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       groupName: '',
       groupType: '',
     ),
-    Expancemain(),
+    ExpenseMain(),
     ActivityScreen(),
     ProfilScreen(),
   ];

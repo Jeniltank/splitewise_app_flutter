@@ -1119,6 +1119,18 @@ class _GroupScreenState extends State<GroupScreen> {
                     itemCount: userGroups.length,
                     itemBuilder: (context, index) {
                       Group group = userGroups[index];
+                      IconData iconData;
+                      switch (group.groupType.toLowerCase()) {
+                        case 'trip':
+                          iconData = Icons
+                              .airplanemode_active; // Change to the trip icon
+                          break;
+                        case 'food':
+                          iconData = Icons.fastfood; // Change to the food icon
+                          break;
+                        default:
+                          iconData = Icons.group; // Default icon
+                      }
                       return Card(
                         color: Colors.teal,
                         elevation: 4,
@@ -1129,7 +1141,10 @@ class _GroupScreenState extends State<GroupScreen> {
                         ),
                         child: ListTile(
                           leading: CircleAvatar(
-                              child: Icon(Icons.group, color: Colors.black)),
+                            child: Icon(iconData,
+                                color:
+                                    Colors.black), // Set the icon dynamically
+                          ),
                           // Prefix icon
                           title: Text(
                             group.groupName,
@@ -1170,7 +1185,8 @@ class _GroupScreenState extends State<GroupScreen> {
                                 builder: (context) => GroupListView(
                                   groupName: group.groupName,
                                   groupId: group.groupId!,
-                                  groupType: group.groupType, groupMembers: [],
+                                  groupType: group.groupType,
+                                  groupMembers: [],
                                   //groupMembers: [],
                                   // friends:
                                   //  group.groupMembers, groupMembers: [], // Use group members

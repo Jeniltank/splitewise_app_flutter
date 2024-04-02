@@ -196,6 +196,397 @@
 // //     );
 // //   }
 // // }
+// import 'package:charts_flutter/flutter.dart' as charts;
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/material.dart';
+//
+// class Expense {
+//   final String description;
+//   final double totalAmount;
+//   final Map<String, dynamic> individualShares;
+//
+//   Expense(this.description, this.totalAmount, this.individualShares);
+// }
+//
+// class ExpenseMainScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         backgroundColor: Colors.teal,
+//         automaticallyImplyLeading: false,
+//         centerTitle: true,
+//         title: Text(
+//           "Expense Chart",
+//           style: TextStyle(color: Colors.white),
+//         ),
+//       ),
+//       body: StreamBuilder(
+//         stream: FirebaseFirestore.instance.collection('expenses').snapshots(),
+//         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return Center(
+//               child: CircularProgressIndicator(),
+//             );
+//           }
+//           if (snapshot.hasError) {
+//             return Center(
+//               child: Text('Error: ${snapshot.error}'),
+//             );
+//           }
+//
+//           final currentUser = FirebaseAuth.instance.currentUser;
+//           if (currentUser == null) {
+//             // Handle case where currentUser is null
+//             return Center(
+//               child: Text('User not authenticated'),
+//             );
+//           }
+//           print(currentUser.uid);
+//
+//           // Filter expenses based on user ID in individualShares
+//           List<Expense> userExpenses = snapshot.data!.docs
+//               .map((DocumentSnapshot doc) {
+//                 return Expense(
+//                   doc['description'],
+//                   doc['totalAmount'],
+//                   // Initialize individualShares as an empty map if it's null or not of type Map<String, dynamic>
+//                   (doc['individualShares'] != null &&
+//                           doc['individualShares'] is Map<String, dynamic>)
+//                       ? doc['individualShares']
+//                       : {},
+//                 );
+//               })
+//               .where((expense) =>
+//                   expense.individualShares.keys.contains(currentUser.uid))
+//               .toList();
+//
+//           // Create a series for the pie chart
+//           var series = [
+//             charts.Series(
+//               id: 'Expenses',
+//               data: userExpenses,
+//               domainFn: (Expense expense, _) => expense.description,
+//               measureFn: (Expense expense, _) => expense.totalAmount,
+//               labelAccessorFn: (Expense expense, _) =>
+//                   '\₹${expense.totalAmount}',
+//             ),
+//           ];
+//
+//           // Create the pie chart
+//           var chart = charts.PieChart(
+//             series,
+//             animate: true,
+//           );
+//
+//           // Return the chart wrapped in a ChartWidget
+//           return Column(
+//             children: [
+//               SizedBox(
+//                 height: 250,
+//                 child: chart,
+//               ),
+//               Expanded(
+//                 child: ListView.builder(
+//                   itemCount: userExpenses.length,
+//                   itemBuilder: (context, index) {
+//                     var expense = userExpenses[index];
+//                     return Card(
+//                       color: Colors.teal,
+//                       elevation: 3,
+//                       margin: EdgeInsets.symmetric(
+//                         vertical: 5,
+//                         horizontal: 16,
+//                       ),
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(0),
+//                         child: ListTile(
+//                           contentPadding: EdgeInsets.symmetric(
+//                             vertical: 12,
+//                             horizontal: 16,
+//                           ),
+//                           title: Text(
+//                             expense.description,
+//                             style: TextStyle(
+//                               fontSize: 18,
+//                               fontWeight: FontWeight.bold,
+//                               color: Colors.white,
+//                             ),
+//                           ),
+//                           subtitle: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               Text(
+//                                 'Amount: ₹${expense.totalAmount}',
+//                                 style: TextStyle(
+//                                   fontSize: 16,
+//                                   color: Colors.white,
+//                                 ),
+//                               ),
+//                               if (expense.individualShares != null)
+//                                 ...expense.individualShares.entries
+//                                     .map((entry) {
+//                                   if (entry.key == currentUser.uid) {
+//                                     return Text(
+//                                       '${entry.key}: ₹${entry.value}',
+//                                       style: TextStyle(
+//                                         fontSize: 16,
+//                                         color: Colors.white,
+//                                       ),
+//                                     );
+//                                     // // } else if (entry.value.containsValue(
+//                                     // //     "U82Ek1MAo1aoApDEvBKsUlUuX5G2")) {
+//                                     // return Text(
+//                                     //   '${entry.key}: ₹${entry.value}',
+//                                     //   style: TextStyle(
+//                                     //     fontSize: 16,
+//                                     //     color: Colors.white,
+//                                     //   ),
+//                                     // );
+//                                   } else {
+//                                     return SizedBox.shrink();
+//                                   }
+//                                 }),
+//                             ],
+//                           ),
+//                           leading: CircleAvatar(
+//                             backgroundColor: Colors.white,
+//                             child: Icon(Icons.currency_rupee_outlined),
+//                           ),
+//                           trailing: IconButton(
+//                             icon: Icon(
+//                               Icons.delete,
+//                               color: Colors.red,
+//                             ),
+//                             onPressed: () {
+//                               _deleteExpense(expense);
+//                             },
+//                           ),
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                 ),
+//               ),
+//             ],
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
+//
+// void _deleteExpense(Expense expense) async {
+//   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+//       .collection('expenses')
+//       .where('description', isEqualTo: expense.description)
+//       .where('totalAmount', isEqualTo: expense.totalAmount)
+//       .limit(1)
+//       .get();
+//
+//   querySnapshot.docs.first.reference.delete();
+// }
+//
+// void main() {
+//   runApp(MaterialApp(
+//     home: ExpenseMainScreen(),
+//   ));
+// }
+// //////////*****************************************************************//////////////////
+//
+// // import 'package:charts_flutter/flutter.dart' as charts;
+// // import 'package:cloud_firestore/cloud_firestore.dart';
+// // import 'package:firebase_auth/firebase_auth.dart';
+// // import 'package:flutter/material.dart';
+// //
+// // class Expense {
+// //   final String description;
+// //   final double totalAmount;
+// //   final Map<String, dynamic>? individualShares;
+// //
+// //   Expense(this.description, this.totalAmount, this.individualShares);
+// // }
+// //
+// // class ExpenseMainScreen extends StatelessWidget {
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return Scaffold(
+// //       appBar: AppBar(
+// //         backgroundColor: Colors.teal,
+// //         automaticallyImplyLeading: false,
+// //         centerTitle: true,
+// //         title: Text(
+// //           "Expense Chart",
+// //           style: TextStyle(color: Colors.white),
+// //         ),
+// //       ),
+// //       body: StreamBuilder(
+// //         stream: FirebaseFirestore.instance.collection('expenses').snapshots(),
+// //         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+// //           if (snapshot.connectionState == ConnectionState.waiting) {
+// //             return Center(
+// //               child: CircularProgressIndicator(),
+// //             );
+// //           }
+// //           if (snapshot.hasError) {
+// //             return Center(
+// //               child: Text('Error: ${snapshot.error}'),
+// //             );
+// //           }
+// //
+// //           final currentUser = FirebaseAuth.instance.currentUser;
+// //           if (currentUser == null) {
+// //             return Center(
+// //               child: Text('User not authenticated'),
+// //             );
+// //           }
+// //
+// //           List<Expense> userExpenses = snapshot.data!.docs
+// //               .map((DocumentSnapshot doc) {
+// //                 var individualShares = doc['individualShares'];
+// //                 return Expense(
+// //                   doc['description'],
+// //                   doc['totalAmount']?.toDouble() ?? 0.0,
+// //                   (individualShares is Map<String, dynamic>)
+// //                       ? individualShares
+// //                       : null,
+// //                 );
+// //               })
+// //               .where((expense) =>
+// //                   expense.individualShares != null &&
+// //                   expense.individualShares!.keys.contains(currentUser.uid))
+// //               .toList();
+// //
+// //           print('User Expenses: ${userExpenses.length}');
+// //
+// //           var series = [
+// //             charts.Series(
+// //               id: 'Expenses',
+// //               data: userExpenses,
+// //               domainFn: (Expense expense, _) => expense.description,
+// //               measureFn: (Expense expense, _) => expense.totalAmount,
+// //               labelAccessorFn: (Expense expense, _) =>
+// //                   '\₹${expense.totalAmount}',
+// //             ),
+// //           ];
+// //
+// //           var chart = charts.PieChart(
+// //             series,
+// //             animate: true,
+// //           );
+// //
+// //           return Column(
+// //             children: [
+// //               SizedBox(
+// //                 height: 250,
+// //                 child: chart,
+// //               ),
+// //               Expanded(
+// //                 child: ListView.builder(
+// //                   itemCount: userExpenses.length,
+// //                   itemBuilder: (context, index) {
+// //                     var expense = userExpenses[index];
+// //                     return Card(
+// //                       color: Colors.teal,
+// //                       elevation: 3,
+// //                       margin: EdgeInsets.symmetric(
+// //                         vertical: 5,
+// //                         horizontal: 16,
+// //                       ),
+// //                       child: Padding(
+// //                         padding: const EdgeInsets.all(0),
+// //                         child: ListTile(
+// //                           contentPadding: EdgeInsets.symmetric(
+// //                             vertical: 12,
+// //                             horizontal: 16,
+// //                           ),
+// //                           title: Text(
+// //                             expense.description,
+// //                             style: TextStyle(
+// //                               fontSize: 18,
+// //                               fontWeight: FontWeight.bold,
+// //                               color: Colors.white,
+// //                             ),
+// //                           ),
+// //                           subtitle: Column(
+// //                             crossAxisAlignment: CrossAxisAlignment.start,
+// //                             children: [
+// //                               Text(
+// //                                 'Amount: ₹${expense.totalAmount}',
+// //                                 style: TextStyle(
+// //                                   fontSize: 16,
+// //                                   color: Colors.white,
+// //                                 ),
+// //                               ),
+// //                               if (expense.individualShares != null)
+// //                                 ...expense.individualShares!.entries
+// //                                     .map((entry) {
+// //                                   if (entry.key == currentUser.uid) {
+// //                                     return Text(
+// //                                       '${entry.key}: ₹${entry.value}',
+// //                                       style: TextStyle(
+// //                                         fontSize: 16,
+// //                                         color: Colors.white,
+// //                                       ),
+// //                                     );
+// //                                   } else {
+// //                                     return SizedBox.shrink();
+// //                                   }
+// //                                 }),
+// //                             ],
+// //                           ),
+// //                           leading: CircleAvatar(
+// //                             backgroundColor: Colors.white,
+// //                             child: Icon(Icons.attach_money),
+// //                           ),
+// //                           trailing: IconButton(
+// //                             icon: Icon(
+// //                               Icons.delete,
+// //                               color: Colors.red,
+// //                             ),
+// //                             onPressed: () {
+// //                               _deleteExpense(expense);
+// //                             },
+// //                           ),
+// //                         ),
+// //                       ),
+// //                     );
+// //                   },
+// //                 ),
+// //               ),
+// //             ],
+// //           );
+// //         },
+// //       ),
+// //     );
+// //   }
+// // }
+// //
+// // void _deleteExpense(Expense expense) async {
+// //   try {
+// //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+// //         .collection('expenses')
+// //         .where('description', isEqualTo: expense.description)
+// //         .where('totalAmount', isEqualTo: expense.totalAmount)
+// //         .limit(1)
+// //         .get();
+// //
+// //     if (querySnapshot.docs.isNotEmpty) {
+// //       querySnapshot.docs.first.reference.delete();
+// //     }
+// //   } catch (e) {
+// //     print('Error deleting expense: $e');
+// //   }
+// // }
+// //
+// // void main() {
+// //   runApp(MaterialApp(
+// //     home: ExpenseMainScreen(),
+// //   ));
+// // }
+
+//************************** RESTART  *****/////////////*************************************************
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -204,14 +595,12 @@ import 'package:flutter/material.dart';
 class Expense {
   final String description;
   final double totalAmount;
-  final Map<String, dynamic> individualShares;
+  final List<Map<String, dynamic>> individualShares;
 
   Expense(this.description, this.totalAmount, this.individualShares);
 }
 
-class Expancemain extends StatelessWidget {
-  final currentUser = FirebaseAuth.instance.currentUser;
-
+class ExpenseMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -225,10 +614,7 @@ class Expancemain extends StatelessWidget {
         ),
       ),
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection('expenses')
-            .where('creatorUserId', isEqualTo: currentUser!.uid)
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection('expenses').snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -241,14 +627,30 @@ class Expancemain extends StatelessWidget {
             );
           }
 
+          // Get the current user's ID
+          final currentUser = FirebaseAuth.instance.currentUser;
+          final currentUserId = currentUser?.uid;
+
           // Convert expenses from Firestore to Expense objects
           List<Expense> expenses =
               snapshot.data!.docs.map((DocumentSnapshot doc) {
+            // Check if individualShares exists and is of the correct type
+            List<Map<String, dynamic>> individualShares = [];
+            if (doc['individualShares'] is List<dynamic>) {
+              individualShares = List<Map<String, dynamic>>.from(
+                  doc['individualShares'] as List<dynamic>);
+            }
             return Expense(
               doc['description'],
               doc['totalAmount'],
-              doc['individualShares'],
+              individualShares,
             );
+          }).toList();
+
+          // Filter expenses to show only those where the current user is included in individual shares
+          expenses = expenses.where((expense) {
+            return expense.individualShares
+                .any((share) => share['userId'] == currentUserId);
           }).toList();
 
           // Create a series for the pie chart
@@ -313,17 +715,34 @@ class Expancemain extends StatelessWidget {
                                   color: Colors.white,
                                 ),
                               ),
-                              if (expense.individualShares != null)
-                                ...expense.individualShares.entries
-                                    .map((entry) {
-                                  return Text(
-                                    '${entry.key}: ₹${entry.value}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
+                              if (expense.individualShares != null &&
+                                  expense.individualShares.isNotEmpty)
+                                ...expense.individualShares
+                                    .where((share) =>
+                                        share['userId'] == currentUserId)
+                                    .map((individualShare) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Username: ${individualShare['username']}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Share: ₹${individualShare['share']}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                    ],
                                   );
-                                }),
+                                }).toList(),
                             ],
                           ),
                           leading: CircleAvatar(
@@ -366,6 +785,6 @@ void _deleteExpense(Expense expense) async {
 
 void main() {
   runApp(MaterialApp(
-    home: Expancemain(),
+    home: ExpenseMain(),
   ));
 }
