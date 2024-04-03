@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:splitewise_flutter/group_Screen_Child/contact_lits.dart';
 
 class AddFriends extends StatefulWidget {
   final String targetGroup;
@@ -29,28 +28,28 @@ class _AddFriendsState extends State<AddFriends> {
     super.dispose();
   }
 
-  Future<void> _getContacts() async {
-    final contactsPermission = await Permission.contacts.request();
-    if (contactsPermission.isGranted) {
-      final Iterable<Contact>? contacts =
-          await ContactsService.getContacts(withThumbnails: false);
-      if (contacts != null) {
-        for (var contact in contacts) {
-          print('Name: ${contact.displayName}');
-          if (contact.phones != null) {
-            for (var phone in contact.phones!) {
-              print('Phone: ${phone.value}');
-              // Add logic to process the phone number here
-            }
-          }
-        }
-      } else {
-        print('Contacts not available');
-      }
-    } else {
-      print('Permission denied');
-    }
-  }
+  // Future<void> _getContacts() async {
+  //   final contactsPermission = await Permission.contacts.request();
+  //   if (contactsPermission.isGranted) {
+  //     final Iterable<Contact>? contacts =
+  //         await ContactsService.getContacts(withThumbnails: false);
+  //     if (contacts != null) {
+  //       for (var contact in contacts) {
+  //         print('Name: ${contact.displayName}');
+  //         if (contact.phones != null) {
+  //           for (var phone in contact.phones!) {
+  //             print('Phone: ${phone.value}');
+  //             // Add logic to process the phone number here
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       print('Contacts not available');
+  //     }
+  //   } else {
+  //     print('Permission denied');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +86,13 @@ class _AddFriendsState extends State<AddFriends> {
                   ),
                 ),
                 IconButton(
-                  onPressed: _getContacts,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ContactListPage()),
+                    );
+                  },
                   icon: Icon(Icons.contacts),
                   tooltip: 'Get Contacts',
                 ),

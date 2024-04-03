@@ -586,11 +586,11 @@
 // //   ));
 // // }
 
-//************************** RESTART  *****/////////////*************************************************
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class Expense {
   final String description;
@@ -653,30 +653,61 @@ class ExpenseMain extends StatelessWidget {
                 .any((share) => share['userId'] == currentUserId);
           }).toList();
 
-          // Create a series for the pie chart
-          var series = [
-            charts.Series(
-              id: 'Expenses',
-              data: expenses,
-              domainFn: (Expense expense, _) => expense.description,
-              measureFn: (Expense expense, _) => expense.totalAmount,
-              labelAccessorFn: (Expense expense, _) =>
-                  '\₹${expense.totalAmount}',
-            ),
+          // Calculate total amount spent by the user based on individual shares
+          double totalAmountSpentByUser = expenses.fold(0, (previous, current) {
+            double userShare = current.individualShares.firstWhere(
+                (share) => share['userId'] == currentUserId,
+                orElse: () => {'share': 0})['share'];
+            return previous + userShare;
+          });
+
+          // Create a list of PieChartSectionData
+          List<Color> sectionColors = [
+            Colors.red,
+            Colors.blue,
+            Colors.green,
+            Colors.orange,
+            Colors.purple,
+            // Add more colors as needed
           ];
 
-          // Create the pie chart
-          var chart = charts.PieChart(
-            series,
-            animate: true,
-          );
+          List<PieChartSectionData> pieChartSections = [];
+          for (int i = 0; i < expenses.length; i++) {
+            final Color color = sectionColors[i %
+                sectionColors
+                    .length]; // Cycle through colors if there are more sections than colors
+            final expense = expenses[i];
+            final sectionData = PieChartSectionData(
+              value: expense.totalAmount,
+              title: '${expense.description}\n\₹${expense.totalAmount}',
+              color: color,
+              radius: 70,
+            );
+            pieChartSections.add(sectionData);
+          }
 
-          // Return the chart wrapped in a ChartWidget
           return Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Total Amount Spent by ${currentUser?.displayName ?? 'You'}: ₹$totalAmountSpentByUser',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 250,
-                child: chart,
+                child: PieChart(
+                  PieChartData(
+                    sections: pieChartSections,
+                    sectionsSpace: 0,
+                    centerSpaceRadius: 40,
+                    borderData: FlBorderData(show: false),
+                  ),
+                ),
               ),
               Expanded(
                 child: ListView.builder(
@@ -692,72 +723,91 @@ class ExpenseMain extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(0),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          title: Text(
-                            expense.description,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Amount: ₹${expense.totalAmount}',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              title: Text(
+                                expense.description,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
-                              if (expense.individualShares != null &&
-                                  expense.individualShares.isNotEmpty)
-                                ...expense.individualShares
-                                    .where((share) =>
-                                        share['userId'] == currentUserId)
-                                    .map((individualShare) {
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Username: ${individualShare['username']}',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Share: ₹${individualShare['share']}',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                    ],
-                                  );
-                                }).toList(),
-                            ],
-                          ),
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.currency_rupee_outlined),
-                          ),
-                          trailing: IconButton(
-                            icon: Icon(
-                              Icons.delete,
-                              color: Colors.red,
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Amount: ₹${expense.totalAmount}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  if (expense.individualShares != null &&
+                                      expense.individualShares.isNotEmpty)
+                                    ...expense.individualShares
+                                        .where((share) =>
+                                            share['userId'] == currentUserId)
+                                        .map((individualShare) {
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Username: ${individualShare['username']}',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Share: ₹${individualShare['share']}',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                        ],
+                                      );
+                                    }).toList(),
+                                ],
+                              ),
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                child: Icon(Icons.currency_rupee_sharp),
+                              ),
+                              trailing: IconButton(
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () {
+                                  _deleteExpense(expense);
+                                },
+                              ),
                             ),
-                            onPressed: () {
-                              _deleteExpense(expense);
-                            },
-                          ),
+                            // Spacer between ListTile and Button
+                            Center(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  _showSettleUpDialog(context, expense);
+                                },
+                                child: Text(
+                                  'Settle up',
+                                  style: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -768,6 +818,69 @@ class ExpenseMain extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Future<void> _showSettleUpDialog(
+      BuildContext context, Expense expense) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Settle Up'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to settle up this expense?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Settle Up'),
+              onPressed: () {
+                _deleteExpense(expense);
+                Navigator.of(context).pop();
+                _showSettleUpSuccessDialog(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showSettleUpSuccessDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Settle Up Successful'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Lottie.asset('assets/animaction/paymentsucceful.json'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
