@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:splitewise_flutter/Start_Screen/expanceScreen.dart';
 import 'package:splitewise_flutter/Widgets/RoundButton.dart';
 import 'package:splitewise_flutter/firebase_login_or_signup/SignupScreen.dart';
+import 'package:splitewise_flutter/firebase_login_or_signup/login_with_mobilnumber.dart';
 import 'package:splitewise_flutter/utils/utills.dart';
 
 class LoginPage extends StatefulWidget {
@@ -40,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ExpenseScreen(),
+          builder: (context) => TabbarScreen(),
         ),
       );
       setState(() {
@@ -113,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 10,
               ),
               // RoundButton(
               //   title: 'Login',
@@ -133,9 +134,22 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
               ),
+              SizedBox(
+                height: 10,
+              ),
+              RoundButton(
+                  title: 'Login with mobil Number ',
+                  loading: loding,
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MobileNumberScreen(),
+                        ));
+                  }),
 
               SizedBox(
-                height: 20,
+                height: 10,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -997,12 +997,53 @@ class _GroupScreenState extends State<GroupScreen> {
 
   late List<String> friends; // Define friends list
 
+  // Future<void> deleteGroup(String groupId) async {
+  //   try {
+  //     await _firestore.collection('groups').doc(groupId).delete();
+  //     print('Group deleted successfully: $groupId');
+  //   } catch (error) {
+  //     print('Error deleting group: $error');
+  //     throw error;
+  //   }
+  // }
+
   Future<void> deleteGroup(String groupId) async {
     try {
-      await _firestore.collection('groups').doc(groupId).delete();
-      print('Group deleted successfully: $groupId');
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        print('Error: User not authenticated.');
+        return;
+      }
+
+      //final groupName = await getGroupName(groupId); // Fetch the group name
+      await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(groupId)
+          .delete();
+      print('Group Deleted successfully: $groupId');
+
+      // Add activity to the 'Activity' collection with group name included in the message
+      await addActivity(
+        userId, 'Group  Deleted successfully',
+        //groupName
+      ); // Pass group name to addActivity
     } catch (error) {
       print('Error deleting group: $error');
+      throw error;
+    }
+  }
+
+  Future<void> addActivity(String userId, String message) async {
+    try {
+      final currentTimeStamp = FieldValue.serverTimestamp();
+      await FirebaseFirestore.instance.collection('Activity').add({
+        'message': message,
+        'userId': userId, // Storing userId along with the activity
+        'timestamp': currentTimeStamp,
+      });
+      print('Activity added successfully: $message');
+    } catch (error) {
+      print('Error adding activity: $error');
       throw error;
     }
   }
@@ -1010,7 +1051,7 @@ class _GroupScreenState extends State<GroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.black87,
+      //backgroundColor: Colors.black87,
       appBar: AppBar(
         backgroundColor: Colors.teal,
         automaticallyImplyLeading: false,

@@ -585,7 +585,6 @@
 // //     home: ExpenseMainScreen(),
 // //   ));
 // // }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -663,7 +662,7 @@ class ExpenseMain extends StatelessWidget {
 
           // Create a list of PieChartSectionData
           List<Color> sectionColors = [
-            Colors.red,
+            // Colors.red,
             Colors.blue,
             Colors.green,
             Colors.orange,
@@ -849,6 +848,10 @@ class ExpenseMain extends StatelessWidget {
                 _deleteExpense(expense);
                 Navigator.of(context).pop();
                 _showSettleUpSuccessDialog(context);
+
+                // Store "Settle Up Successful" message in the "Activity" collection
+                _storeActivityMessage(
+                    'Expense "${expense.description}" Settle-Up successfully');
               },
             ),
           ],
@@ -858,7 +861,7 @@ class ExpenseMain extends StatelessWidget {
   }
 
   Future<void> _showSettleUpSuccessDialog(BuildContext context) async {
-    return showDialog<void>(
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -876,6 +879,8 @@ class ExpenseMain extends StatelessWidget {
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
+                // Add activity to the 'Activity' collection
+                //_addSettleUpActivity();
               },
             ),
           ],
@@ -883,17 +888,72 @@ class ExpenseMain extends StatelessWidget {
       },
     );
   }
-}
 
-void _deleteExpense(Expense expense) async {
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-      .collection('expenses')
-      .where('description', isEqualTo: expense.description)
-      .where('totalAmount', isEqualTo: expense.totalAmount)
-      .limit(1)
-      .get();
+  // Future<void> _addSettleUpActivity() async {
+  //   try {
+  //     // Store activity in the 'Activity' collection
+  //     await FirebaseFirestore.instance.collection('Activity').add({
+  //       'message': 'Expense settled  up successfully',
+  //       'timestamp': FieldValue.serverTimestamp(),
+  //     });
+  //   } catch (e) {
+  //     print('Error adding settle up activity: $e');
+  //     // Handle error while adding activity
+  //   }
+  // }
 
-  querySnapshot.docs.first.reference.delete();
+  void _deleteExpense(Expense expense) async {
+    try {
+      // Retrieve the expense document to be deleted
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('expenses')
+          .where('description', isEqualTo: expense.description)
+          .where('totalAmount', isEqualTo: expense.totalAmount)
+          .limit(1)
+          .get();
+
+      // Delete the expense document
+      querySnapshot.docs.first.reference.delete();
+
+      // Store the deleted expense details in a shared collection accessible to all users
+      await FirebaseFirestore.instance.collection('deleted_expenses').add({
+        'description': expense.description,
+        'totalAmount': expense.totalAmount,
+        'deletedBy': FirebaseAuth.instance.currentUser
+            ?.uid, // Store the user who deleted the expense
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Store activity in the 'Activity' collection
+      await FirebaseFirestore.instance.collection('Activity').add({
+        'message': 'Expense "${expense.description}" deleted successfully',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error deleting expense: $e');
+      // Handle error while deleting expense
+    }
+  }
+
+  void _storeActivityMessage(String message) async {
+    try {
+      // Get the current user
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        // Store the current user's name and user ID along with the message
+        await FirebaseFirestore.instance.collection('Activity').add({
+          'message': message,
+          'userId': currentUser.uid,
+          'userName': currentUser.displayName,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      } else {
+        print('Error: Current user is null.');
+      }
+    } catch (e) {
+      print('Error storing activity message: $e');
+    }
+  }
 }
 
 void main() {

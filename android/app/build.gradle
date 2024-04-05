@@ -1,8 +1,8 @@
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin"
-}
+ plugins {
+     id "com.android.application"
+     id "kotlin-android"
+     id "dev.flutter.flutter-gradle-plugin"
+ }
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
@@ -26,6 +26,7 @@ android {
     namespace "com.example.splitewise_flutter"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
+    compileSdkVersion 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

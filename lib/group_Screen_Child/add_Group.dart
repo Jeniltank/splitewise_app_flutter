@@ -194,6 +194,7 @@
 //     home: AddGroup(),
 //   ));
 // }
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:splitewise_flutter/Firebase_services/database_service_for_add_group.dart';
 import 'package:splitewise_flutter/models/group.dart';
@@ -341,6 +342,29 @@ class _AddGroupState extends State<AddGroup> {
                     groupList.add(groupName); // Add new group to the list
                   });
                   groupNameController.clear();
+
+                  try {
+                    // Store activity in the 'Activity' collection
+                    await FirebaseFirestore.instance
+                        .collection('Activity')
+                        .add({
+                      'message': 'Group "$groupName" created successfully',
+                      'userId':
+                          userId, // Storing userId along with the activity
+                      'timestamp':
+                          FieldValue.serverTimestamp(), // Add timestamp
+                    });
+
+                    // Show a SnackBar with the success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Group created successfully'),
+                      ),
+                    );
+                  } catch (e) {
+                    print('Error adding activity: $e');
+                    // Handle error while adding activity
+                  }
                 } else {
                   print('Please enter group name and select group type');
                 }

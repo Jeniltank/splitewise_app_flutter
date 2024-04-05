@@ -624,14 +624,13 @@
 
 /********************************************************/ //
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-// Assuming you have a function to get group members stream
-import 'group_Screen_Child/group_Listview_data.dart';
+import 'package:splitewise_flutter/group_Screen_Child/group_Listview_data.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final String groupId;
-  final String groupName; // Variable to hold the group name
+  final String groupName;
   final List<String> groupMembers;
 
   const AddExpenseScreen({
@@ -651,32 +650,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   Future<Map<String, dynamic>> getUsername(String userId) async {
     try {
-      // Get the user document from Firestore using userId
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('Users')
           .doc(userId)
           .get();
 
-      // Check if the document exists
       if (userSnapshot.exists) {
-        // Access the 'username' field from the document data
         String username = userSnapshot['username'];
-        // Check if the username is empty
         if (username.isNotEmpty) {
-          // Return a map containing the userId and username
           return {'userId': userId, 'username': username};
         } else {
-          // If the username is empty, provide a default value
           return {'userId': userId, 'username': 'Unknown User'};
         }
       } else {
-        // If the user document doesn't exist, return a map with userId and an empty username
         return {'userId': userId, 'username': 'Unknown User'};
       }
     } catch (e) {
-      // Handle any errors that occur during the Firestore operation
       print('Error fetching username: $e');
-      // Return a map with userId and a default username in case of an error
       return {'userId': userId, 'username': 'Unknown User'};
     }
   }
@@ -741,7 +731,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ),
             SizedBox(height: 10),
             Expanded(
-              // Wrap your ListView.builder with Expanded
               child: StreamBuilder(
                 stream: getGroupMembersStream(widget.groupId),
                 builder: (context, snapshot) {
@@ -781,9 +770,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                   color: Colors.white,
                                 ),
                               ),
-                              // Assuming you want to select members here
                               onTap: () {
-                                // Toggle member selection
                                 setState(() {
                                   if (widget.groupMembers.contains(userId)) {
                                     widget.groupMembers.remove(userId);
@@ -792,7 +779,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                   }
                                 });
                               },
-                              // Assuming you want to show selected members differently
                               trailing: Icon(
                                 widget.groupMembers.contains(userId)
                                     ? Icons.check_circle
@@ -811,7 +797,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _addExpense();
+                _addExpense(widget.groupId); // Pass groupId to _addExpense
               },
               child: Text('Add Expense'),
             ),
@@ -821,63 +807,47 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
-  void _addExpense() async {
-    // Retrieve the description and total amount from the text controllers
+  void _addExpense(String userId) async {
     String description = _descriptionController.text.trim();
     String amountText = _amountController.text.trim();
 
-    // Check if the description and amount fields are empty
     if (description.isEmpty || amountText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter both description and amount.'),
         ),
       );
-      return; // Exit the function early
+      return;
     }
 
-    // Parse the amount to double
     double totalAmount = double.tryParse(amountText) ?? 0.0;
 
-    // Check if the total amount is non-positive
     if (totalAmount <= 0.0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter a valid amount.'),
         ),
       );
-      return; // Exit the function early
+      return;
     }
 
     try {
-      // Create a list to store individual shares for selected members
       List<Map<String, dynamic>> individualShares = [];
 
-      // Iterate through selected group members
       for (String userId in widget.groupMembers) {
-        // Retrieve the username corresponding to the userId
         Map<String, dynamic> userData = await getUsername(userId);
-        String username = userData['username'] ??
-            'Unknown User'; // Use default username if not found
-
-        // Calculate individual share
+        String username = userData['username'] ?? 'Unknown User';
         double individualShare = totalAmount / widget.groupMembers.length;
-
-        // Create a map to store userId, username, and share
         Map<String, dynamic> shareData = {
           'userId': userId,
           'username': username,
           'share': individualShare,
         };
-
-        // Add the share data to the list
         individualShares.add(shareData);
       }
 
-      // Get the current server timestamp
       final currentTimeStamp = FieldValue.serverTimestamp();
 
-      // Store the expense details in Firestore
       await FirebaseFirestore.instance.collection('expenses').add({
         'groupId': widget.groupId,
         'groupName': widget.groupName,
@@ -887,17 +857,38 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         'timestamp': currentTimeStamp,
       });
 
-      // Show a message indicating expense added successfully
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Expense added successfully!'),
-        ),
-      );
+      // Get current user's username
+      // final currentUser = await getUsername(userId);
+      // final currentUsername = currentUser['username'];
+      //
+      // await FirebaseFirestore.instance.collection('Activity').add({
+      //   'message': 'Expense added successfully   $description',
+      //   'timestamp': currentTimeStamp,
+      // });
 
-      // Optionally, you can navigate back to the previous screen
+      // Fetch current user's data including username and userId
+      final currentUserData = await getUsername(userId);
+      final currentUsername = currentUserData['username'];
+      final currentUserId = currentUserData['userId'];
+
+      // Add the activity to the 'Activity' collection
+      await FirebaseFirestore.instance.collection('Activity').add({
+        'message': 'Expense added "$description" successfully ',
+        'userId': userId, // Storing userId along with the activity
+        'timestamp': currentTimeStamp,
+      });
+
+// Show success message only to the user who added the expense
+      if (userId == FirebaseAuth.instance.currentUser?.uid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Expense added "$description" successfully!'),
+          ),
+        );
+      }
+
       Navigator.pop(context);
     } catch (e) {
-      // Handle any errors that occur during Firestore write
       print('Error adding expense: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
