@@ -969,6 +969,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:splitewise_flutter/Firebase_services/database_service_for_add_group.dart';
 import 'package:splitewise_flutter/group_Screen_Child/add_Group.dart'
     as AddGroupChild;
@@ -1208,17 +1209,58 @@ class _GroupScreenState extends State<GroupScreen> {
                               color: Colors.redAccent,
                             ),
                             onPressed: () {
-                              // Ensure groupId is not null before attempting deletion
-                              if (group.groupId != null) {
-                                // Assuming groupId is a String, if it's not, adjust accordingly
-                                deleteGroup(group
-                                    .groupId!); // Use ! to assert non-nullability
-                              } else {
-                                // Handle null groupId case
-                                print('Group ID is null. Unable to delete.');
-                              }
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Conform Deletion'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Lottie.asset(
+                                          'assets/animaction/delate.json',
+                                          // Replace with your Lottie file path
+                                          height:
+                                              100, // Adjust height as needed
+                                          width: 100, // Adjust width as needed
+                                        ),
+                                        SizedBox(height: 16),
+                                        Text(
+                                            'Are you sure you want to delete this group?'),
+                                      ],
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                        },
+                                        child: Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Ensure groupId is not null before attempting deletion
+                                          if (group.groupId != null) {
+                                            // Assuming groupId is a String, if it's not, adjust accordingly
+                                            deleteGroup(group
+                                                .groupId!); // Use ! to assert non-nullability
+                                            Navigator.of(context)
+                                                .pop(); // Close the dialog
+                                          } else {
+                                            // Handle null groupId case
+                                            print(
+                                                'Group ID is null. Unable to delete.');
+                                          }
+                                        },
+                                        child: Text('Delete'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                           ),
+
                           onTap: () {
                             Navigator.push(
                               context,

@@ -678,60 +678,61 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         backgroundColor: Colors.teal,
         title: Text('Add Expense'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Enter Description:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        // Wrap with SingleChildScrollView
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Enter Description:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Enter Expense Amount:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              SizedBox(height: 20),
+              Text(
+                'Enter Expense Amount:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextFormField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                border: OutlineInputBorder(),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Amount',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the amount';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter the amount';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Select Group Member:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              SizedBox(height: 20),
+              Text(
+                'Select Group Member:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: StreamBuilder(
+              SizedBox(height: 10),
+              StreamBuilder(
                 stream: getGroupMembersStream(widget.groupId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -793,15 +794,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   }
                 },
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _addExpense(widget.groupId); // Pass groupId to _addExpense
-              },
-              child: Text('Add Expense'),
-            ),
-          ],
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  String currentUserId =
+                      FirebaseAuth.instance.currentUser?.uid ?? '';
+                  _addExpense(
+                      currentUserId); // Pass currentUserId to _addExpense
+                },
+                child: Text('Add Expense'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -867,14 +871,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       // });
 
       // Fetch current user's data including username and userId
+      // Fetch current user's data including username and userId
+
       final currentUserData = await getUsername(userId);
       final currentUsername = currentUserData['username'];
       final currentUserId = currentUserData['userId'];
 
-      // Add the activity to the 'Activity' collection
+// Add the activity to the 'Activity' collection
       await FirebaseFirestore.instance.collection('Activity').add({
         'message': 'Expense added "$description" successfully ',
-        'userId': userId, // Storing userId along with the activity
+        'userId': currentUserId, // Use currentUserId instead of userId
         'timestamp': currentTimeStamp,
       });
 

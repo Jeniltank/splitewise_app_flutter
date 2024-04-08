@@ -186,14 +186,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:splitewise_flutter/Start_Screen/expanceScreen.dart';age:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:splitewise_flutter/Start_Screen/expanceScreen.dart';
-
-//import 'package:splitewise_flutter/Start_Screen/expanceScreen.dart';
 import 'package:splitewise_flutter/firebase_login_or_signup/otpscreen.dart';
-//import 'package:splitewise_flutter/screens/expense_screen.dart'; // Import your ExpenseScreen
 
 class MobileNumberScreen extends StatefulWidget {
   const MobileNumberScreen({Key? key}) : super(key: key);
@@ -220,11 +214,9 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) {
-          // Automatically sign in when verification is completed
           signInWithCredential(credential);
         },
         verificationFailed: (FirebaseAuthException e) {
-          // Handle verification failure
           print('Verification failed: ${e.message}');
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Verification failed. Please try again later.'),
@@ -232,7 +224,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
           ));
         },
         codeSent: (String verificationId, int? resendToken) {
-          // Save verification ID and navigate to OTP screen
           setState(() {
             _verificationId = verificationId;
           });
@@ -244,7 +235,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
           );
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          // Handle code auto-retrieval timeout
           print('Auto-retrieval timeout: $verificationId');
         },
       );
@@ -259,14 +249,9 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
 
   Future<void> signInWithCredential(PhoneAuthCredential credential) async {
     try {
-      // Sign in with the received credential
       await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // After successful sign-in, store user data in Firestore
       await storeUserDataInFirestore(
           _nameController.text.trim(), _mobileController.text.trim());
-
-      // Navigate to the ExpenseScreen after successful sign-in
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -285,15 +270,12 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
   Future<void> storeUserDataInFirestore(
       String name, String mobileNumber) async {
     try {
-      // Get the current user
       User? user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        // Create a reference to the Firestore collection 'Users'
         CollectionReference users =
             FirebaseFirestore.instance.collection('Users');
 
-        // Add the user's data to Firestore
         await users.doc(user.uid).set({
           'name': name,
           'mobileNumber': mobileNumber,
@@ -328,7 +310,7 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Lottie.asset(
-                'assets/animaction/signup2.json', // Replace with your Lottie file path
+                'assets/animaction/signup2.json',
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -359,7 +341,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                   ),
                 ),
                 onTap: () {
-                  // Scroll to the top when the mobile number field is tapped
                   _scrollController.animateTo(
                     0.0,
                     duration: Duration(milliseconds: 300),
@@ -370,7 +351,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Check if the mobile number is provided and valid
                   if (_mobileController.text.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Please enter your mobile number.'),
@@ -387,7 +367,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                     return;
                   }
 
-                  // Verify the provided phone number
                   verifyPhoneNumber('+91${_mobileController.text.trim()}');
                 },
                 style: ElevatedButton.styleFrom(

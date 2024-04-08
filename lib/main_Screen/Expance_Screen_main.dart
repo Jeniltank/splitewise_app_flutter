@@ -726,72 +726,110 @@ class ExpenseMain extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 16,
-                              ),
-                              title: Text(
-                                expense.description,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 16,
                                 ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Amount: ₹${expense.totalAmount}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
+                                title: Text(
+                                  expense.description,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
-                                  if (expense.individualShares != null &&
-                                      expense.individualShares.isNotEmpty)
-                                    ...expense.individualShares
-                                        .where((share) =>
-                                            share['userId'] == currentUserId)
-                                        .map((individualShare) {
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Username: ${individualShare['username']}',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Share: ₹${individualShare['share']}',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          SizedBox(height: 4),
-                                        ],
-                                      );
-                                    }).toList(),
-                                ],
-                              ),
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.white,
-                                child: Icon(Icons.currency_rupee_sharp),
-                              ),
-                              trailing: IconButton(
-                                icon: Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
                                 ),
-                                onPressed: () {
-                                  _deleteExpense(expense);
-                                },
-                              ),
-                            ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Amount: ₹${expense.totalAmount}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    if (expense.individualShares != null &&
+                                        expense.individualShares.isNotEmpty)
+                                      ...expense.individualShares
+                                          .where((share) =>
+                                              share['userId'] == currentUserId)
+                                          .map((individualShare) {
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Username: ${individualShare['username']}',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Share: ₹${individualShare['share']}',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            SizedBox(height: 4),
+                                          ],
+                                        );
+                                      }).toList(),
+                                  ],
+                                ),
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child: Icon(Icons.currency_rupee_sharp),
+                                ),
+                                trailing: IconButton(
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Delete Expense'),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Lottie.asset(
+                                                'assets/animaction/delate.json',
+                                                // Replace with your Lottie file path
+                                                height: 100,
+                                                width: 100,
+                                              ),
+                                              SizedBox(height: 16),
+                                              Text(
+                                                  'Are you sure you want to delete this expense?'),
+                                            ],
+                                          ),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              },
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                _deleteExpense(
+                                                    expense); // Call deleteExpense if confirmed
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              },
+                                              child: Text('Delete'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                )),
                             // Spacer between ListTile and Button
                             Center(
                               child: ElevatedButton(
@@ -851,7 +889,7 @@ class ExpenseMain extends StatelessWidget {
 
                 // Store "Settle Up Successful" message in the "Activity" collection
                 _storeActivityMessage(
-                    'Expense "${expense.description}" Settle-Up successfully');
+                    'Expense "${expense.description}" Settleup successfully');
               },
             ),
           ],
@@ -916,17 +954,19 @@ class ExpenseMain extends StatelessWidget {
       querySnapshot.docs.first.reference.delete();
 
       // Store the deleted expense details in a shared collection accessible to all users
-      await FirebaseFirestore.instance.collection('deleted_expenses').add({
-        'description': expense.description,
-        'totalAmount': expense.totalAmount,
-        'deletedBy': FirebaseAuth.instance.currentUser
-            ?.uid, // Store the user who deleted the expense
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+      // await FirebaseFirestore.instance.collection('deleted_expenses').add({
+      //   'description': expense.description,
+      //   'totalAmount': expense.totalAmount,
+      //   'deletedBy': FirebaseAuth.instance.currentUser
+      //       ?.uid, // Store the user who deleted the expense
+      //   'timestamp': FieldValue.serverTimestamp(),
+      // });
 
       // Store activity in the 'Activity' collection
+      String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
       await FirebaseFirestore.instance.collection('Activity').add({
         'message': 'Expense "${expense.description}" deleted successfully',
+        'userId': currentUserId, // Storing current user ID
         'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:splitewise_flutter/main_Screen/Expance_Screen_main.dart';
+import 'package:splitewise_flutter/Start_Screen/expanceScreen.dart';
 
 class OtpScreen extends StatefulWidget {
   String verificationId;
@@ -56,7 +56,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       .then((value) => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ExpenseMain(),
+                            builder: (context) => TabbarScreen(),
                           )));
                 } catch (ex) {
                   //log(ex.toString());

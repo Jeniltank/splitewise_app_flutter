@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:splitewise_flutter/add_expance%20Scren.dart';
 import 'package:splitewise_flutter/group_Screen_Child/Add_friends.dart';
 
-import '../add_expance Scren.dart';
+//import '../add_expense_screen.dart';
 
 class GroupListView extends StatefulWidget {
   final String groupName;
@@ -173,6 +174,23 @@ class _GroupListViewState extends State<GroupListView> {
                       setState(() {
                         widget.groupMembers.add(selectedFriendId);
                       });
+
+                      // Retrieve the username from the selectedFriendId
+                      String username = await _getUsername(selectedFriendId);
+
+                      // Store activity in the 'Activity' collection
+                      await FirebaseFirestore.instance
+                          .collection('Activity')
+                          .add({
+                        'message':
+                            'User "$username" added to group "${widget.groupName}"',
+                        'userId': selectedFriendId,
+                        // Storing userId along with the activity
+                        'username': username,
+                        // Storing username along with the activity
+                        'timestamp': FieldValue.serverTimestamp(),
+                        // Add timestamp
+                      });
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -228,17 +246,15 @@ class _GroupListViewState extends State<GroupListView> {
     );
   }
 
-  // Example method to get a stream of group members
+  Future<String> _getUsername(String userId) async {
+    // Retrieve the username associated with the userId from Firestore
+    DocumentSnapshot userSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
 
-  Future<String> _extractUsername(String fullName) async {
-    // Split the full name by the colon character ':'
-    List<String> parts = fullName.split(':');
-    if (parts.length == 2) {
-      // Return the second part, which should be the username
-      return parts[1].trim();
+    if (userSnapshot.exists) {
+      return userSnapshot['username'];
     } else {
-      // If the format is not as expected, throw an error or return a default value
-      throw FormatException('Invalid full name format');
+      return 'Unknown User';
     }
   }
 }
